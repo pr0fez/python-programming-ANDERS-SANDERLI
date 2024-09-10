@@ -1,4 +1,4 @@
-# Laboration 1
+# Python Programming 
 
 This repo was created as a first project. The goal is to learn the ropes with Git and GitHub. All future laborations will be part of this repository. 
 
