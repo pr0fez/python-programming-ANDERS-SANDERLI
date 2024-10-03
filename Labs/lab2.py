@@ -1,12 +1,10 @@
-# importing dependencies
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-# functions
-def read_files(pT, pD):                               # returns testpoints_arr, datapoints_arr
+def read_files(T_path, D_path):                 # returns testpoints_arr, datapoints_arr
     
-    with open(pT, "r") as tp:
+    with open(T_path, "r") as tp:
         temp_list = []
         lines = tp.readlines()
         for row in lines[1:]:
@@ -16,7 +14,7 @@ def read_files(pT, pD):                               # returns testpoints_arr, 
                 temp_list.append(pair)
                 testpoints_arr = np.array(temp_list, dtype=float)
 
-    with open(pD, "r") as dp:
+    with open(D_path, "r") as dp:
         temp_list = []
         lines = dp.readlines()
         for row in lines[1:]:
@@ -30,9 +28,12 @@ def read_files(pT, pD):                               # returns testpoints_arr, 
 def scatter_points(T, D):                       # returns nothing. prints a scatter plot
 
     # this trick with scatter came from Copilot, highlighting the code and prompting: "I want the legend to only show the three alternatives, not each dot."
+    # below is the code that was generated
     plt.scatter([], [], color="black", label="Pichu", edgecolors="black", linewidth=1, s=75, alpha=0.75)
     plt.scatter([], [], color="gold", label="Pikachu", edgecolors="black", linewidth=1, s=75, alpha=0.75)
     plt.scatter([], [], color="dodgerblue", label="Test points", edgecolors="black", linewidth=1, s=75, alpha=0.75)
+    # above is the code that was generated
+    # this trick with scatter came from Copilot, highlighting the code and prompting: "I want the legend to only show the three alternatives, not each dot."
 
     for x, y in T:
         plt.scatter(x, y, color="dodgerblue", zorder=4, edgecolors="black", linewidth=1, s=75, alpha=0.75)
@@ -64,7 +65,7 @@ def distance_listing(T, D):                     # returns distance_list_2D
     return distance_list_2D
 
 
-def nearest_neighbour(T, D):                    # returns nothing. ######prints classification
+def nearest_neighbour(T, D):                    # returns nothing. prints classification
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
     distance_list_2D = distance_listing(T, D)
     for i in range(len(distance_list_2D)):
@@ -88,6 +89,7 @@ def user_testpoint():                           # returns T_user
         try:
             width = float(input("Enter width: "))
             height = float(input("Enter height: "))
+            print()
 
             if width < 0 or height < 0:
                 print("Width and height must be positive.")
@@ -102,11 +104,11 @@ def user_testpoint():                           # returns T_user
     return T_user
 
 
-def k_nearest_neighbour(T, D, k, printing):        # returns class_guesses_arr, prints classification if printing == True
+def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, prints classification if printing == True
     
     temp_list_T = []
     temp_list_class = []
-    pokémon_dict = {0: "Pichu", 1: "Pikachu"}    
+    pokémon_dict = {0: "Pichu", 1: "Pikachu"}
 
     distance_list_2D = distance_listing(T, D)
 
@@ -114,7 +116,7 @@ def k_nearest_neighbour(T, D, k, printing):        # returns class_guesses_arr, 
     for list in distance_list_2D:
         temp = list.copy()
         temp.sort()
-        sorted_distances.append(temp[:k])
+        sorted_distances.append(temp[:k])                   # plockar ut de k (default = 10) minsta avstånden
     
     sorted_indices = []
     for i in range(len(sorted_distances)):
@@ -123,6 +125,10 @@ def k_nearest_neighbour(T, D, k, printing):        # returns class_guesses_arr, 
             index = distance_list_2D[i].index(distance)
             temp_list.append(index)
         sorted_indices.append(temp_list)
+
+    # print(len(sorted_indices))
+    # print(len(sorted_indices[0]))
+    # print(sorted_indices)
     
     sorted_class = []
     for i in range(len(sorted_indices)):
@@ -312,36 +318,36 @@ def menu():                                     # runs the show
             user_choice = int(input())
 
             if user_choice == 1:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 scatter_points(T, D)
                 nearest_neighbour(T, D)
 
             elif user_choice == 2:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 T_user = user_testpoint()
                 nearest_neighbour(T_user, D)
                 scatter_points(T_user, D)
 
             elif user_choice == 3:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 T_user = user_testpoint()
                 printing = True
                 k_nearest_neighbour(T_user, D, k, printing)
                 scatter_points(T_user, D)
 
             elif user_choice == 4:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 T_new, T_new_key, D_new = new_points(D)
                 printing = True
                 guesses = k_nearest_neighbour(T_new, D_new, k, printing)
                 scatter_points(T_new, D_new)
 
             elif user_choice == 5:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 iterations(times)
 
             elif user_choice == 6:
-                print(f"You chose {user_choice}\n\n")
+                print("\n\n")
                 print(f"Have a good day.")
                 break
 
@@ -359,11 +365,14 @@ path_testpoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/D
 T, D = read_files(path_testpoints, path_datapoints)
 k = 10
 times = 10
+printing = False
 
 
-# TESTING
-menu()
+# menu()
+
+class_guesses_arr = k_nearest_neighbour(T, D, k, printing)
 
 
 # FIX
-# 1. 
+# 1.1 kommentera min kod
+# 1.2 i KNN() 
