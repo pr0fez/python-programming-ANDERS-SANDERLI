@@ -79,10 +79,30 @@ def nearest_neighbour(T, D):                    # returns nothing. ######prints 
         print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[nearest_class]}.")
 
 
-# def user_testpoint()
+def user_testpoint():                           # returns T_user
+
+    T_user = []
+
+    while True:
+
+        try:
+            width = float(input("Enter width: "))
+            height = float(input("Enter height: "))
+
+            if width < 0 or height < 0:
+                print("Width and height must be positive.")
+                continue
+
+            T_user.append([width, height])
+            break
+
+        except ValueError as err:
+            print(f"An error occured: '{err}'")
+    
+    return T_user
 
 
-def k_nearest_neighbour(T, D, k):               # returns class_guesses_arr, prints classification
+def k_nearest_neighbour(T, D, k, printing):        # returns class_guesses_arr, prints classification if printing == True
     
     temp_list_T = []
     temp_list_class = []
@@ -124,11 +144,13 @@ def k_nearest_neighbour(T, D, k):               # returns class_guesses_arr, pri
 
         # print classification and make a list of same guesses
         if num_pichu > num_pikachu:
-            # print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[0]}.")
+            if printing == True:
+                print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[0]}.")
             temp_list_T.append(T[i])
             temp_list_class.append([0.0])
         else:
-            # print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
+            if printing == True:
+                print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
             temp_list_T.append(T[i])
             temp_list_class.append([1.0])
     
@@ -188,7 +210,7 @@ def new_points(D):                              # returns new_testpoints_arr, ne
         temp_list = new_testpoints_key_arr[i][:2]
         new_testpoints_list.append(temp_list)
     
-    new_testpoints_arr = np.array(new_testpoints_list)
+    new_testpoints_arr = np.array(new_testpoints_list) 
 
 
     return new_testpoints_arr, new_testpoints_key_arr, new_datapoints_arr
@@ -220,6 +242,7 @@ def accuracy(key, guess):                       # returns accuracy_score, accura
 def iterations(times):                          # returns nothing. prints accuracy table and plot
 
     # variables
+    printing = False
     score_over_time = []
     score_dict = {"TP": 0, "TN": 0, "FP": 0, "FN": 0}
     x = []
@@ -227,7 +250,7 @@ def iterations(times):                          # returns nothing. prints accura
     # run the whole program multiple times
     for i in range(times):
         T_new, T_new_key, D_new = new_points(D)
-        T_guess = k_nearest_neighbour(T_new, D_new, k)
+        T_guess = k_nearest_neighbour(T_new, D_new, k, printing)
         score, temp_dict = accuracy(T_new_key, T_guess)
         score_over_time.append(score*100)
         for key in temp_dict:
@@ -267,16 +290,9 @@ def iterations(times):                          # returns nothing. prints accura
     | {average_score:^{len(outer_border)-4}} |
     {outer_border}
     """)
-36
+
 
 def menu():                                     # runs the show
-
-    # variables
-    path_datapoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/datapoints.txt"
-    path_testpoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/testpoints.txt"
-    T, D = read_files(path_testpoints, path_datapoints)
-    k = 10
-    times = 10
 
     print("Welcome.  \n\nThis is the APCP (Albot Pokémon Classification Program).")
     
@@ -301,15 +317,24 @@ def menu():                                     # runs the show
                 nearest_neighbour(T, D)
 
             elif user_choice == 2:
-                print(f"You chose {user_choice}\n\n")           # måste göra klart user_testpoint()
+                print(f"You chose {user_choice}\n\n")
+                T_user = user_testpoint()
+                nearest_neighbour(T_user, D)
+                scatter_points(T_user, D)
 
             elif user_choice == 3:
-                print(f"You chose {user_choice}\n\n")           # måste göra klart user_testpoint()
+                print(f"You chose {user_choice}\n\n")
+                T_user = user_testpoint()
+                printing = True
+                k_nearest_neighbour(T_user, D, k, printing)
+                scatter_points(T_user, D)
 
             elif user_choice == 4:
                 print(f"You chose {user_choice}\n\n")
                 T_new, T_new_key, D_new = new_points(D)
-                guesses = k_nearest_neighbour(T, D, k)          # kanske skulle kunna ha en input-variabel som frågar om klassifikation ska/inte printas?
+                printing = True
+                guesses = k_nearest_neighbour(T_new, D_new, k, printing)
+                scatter_points(T_new, D_new)
 
             elif user_choice == 5:
                 print(f"You chose {user_choice}\n\n")
@@ -328,5 +353,17 @@ def menu():                                     # runs the show
             print(f"An error occured: '{err}'")
 
 
-# showtime
+# global variables
+path_datapoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/datapoints.txt"
+path_testpoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/testpoints.txt"
+T, D = read_files(path_testpoints, path_datapoints)
+k = 10
+times = 10
+
+
+# TESTING
 menu()
+
+
+# FIX
+# 1. 
