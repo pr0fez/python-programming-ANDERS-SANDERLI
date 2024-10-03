@@ -106,6 +106,7 @@ def user_testpoint():                           # returns T_user
 
 def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, prints classification if printing == True
     
+    # variables
     temp_list_T = []
     temp_list_class = []
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
@@ -116,25 +117,21 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
     for list in distance_list_2D:
         temp = list.copy()
         temp.sort()
-        sorted_distances.append(temp[:k])                   # plockar ut de k (default = 10) minsta avstånden
+        sorted_distances.append(temp[:k])                   # creates a list of the kth (default = 10) smallest distances for each testpoint ...
     
     sorted_indices = []
     for i in range(len(sorted_distances)):
         temp_list = []
         for distance in sorted_distances[i]:
-            index = distance_list_2D[i].index(distance)
+            index = distance_list_2D[i].index(distance)     # ... searching for the distance in the original list and saving the index ...
             temp_list.append(index)
         sorted_indices.append(temp_list)
-
-    # print(len(sorted_indices))
-    # print(len(sorted_indices[0]))
-    # print(sorted_indices)
     
     sorted_class = []
     for i in range(len(sorted_indices)):
         temp_list = []
         for index in sorted_indices[i]:
-            label = D[index][2]
+            label = D[index][2]                             # ... uses the index to find the class label
             temp_list.append(float(label))
         sorted_class.append(temp_list)
     
@@ -148,17 +145,38 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
             else:
                 num_pikachu += 1
 
-        # print classification and make a list of same guesses
+        # majority voting, print classification and make a list of same guesses
         if num_pichu > num_pikachu:
             if printing == True:
                 print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[0]}.")
             temp_list_T.append(T[i])
             temp_list_class.append([0.0])
-        else:
+        elif num_pichu < num_pikachu:
             if printing == True:
                 print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
             temp_list_T.append(T[i])
             temp_list_class.append([1.0])
+            
+        # if there is a tie, choose via weighted voting, print classification and make a list of same guesses
+        else:
+            weight_pichu = 0
+            weight_pikachu = 0
+            combined_distance_class = [[d, c] for d, c in zip(sorted_distances[i], sorted_class[i])]
+            for distance, label in combined_distance_class:
+                if label == 0:
+                    weight_pichu += 1 / distance
+                else:
+                    weight_pikachu += 1 / distance
+            if weight_pichu > weight_pikachu:
+                if printing == True:
+                    print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[0]}.")
+                temp_list_T.append(T[i])
+                temp_list_class.append([0.0])
+            else:
+                if printing == True:
+                    print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
+                temp_list_T.append(T[i])
+                temp_list_class.append([1.0])
     
     class_guesses_arr = np.hstack((temp_list_T, temp_list_class))
 
@@ -191,11 +209,11 @@ def new_points(D):                              # returns new_testpoints_arr, ne
             temp_pikachu = []
             np.random.shuffle(pichu_points_arr)
             np.random.shuffle(pikachu_points_arr)
-            temp_pichu = pichu_points_arr[0]                # plocka index noll
+            temp_pichu = pichu_points_arr[0]                # using index zero to get the first element for each Pokémon ...
             temp_pikachu = pikachu_points_arr[0]
             new_testpoints_list.append(temp_pichu)
             new_testpoints_list.append(temp_pikachu)
-            pichu_points_arr = pichu_points_arr[1:]         # nya filen utan index noll
+            pichu_points_arr = pichu_points_arr[1:]         # ... then updating the list to include all elements except the first
             pikachu_points_arr = pikachu_points_arr[1:]
         else:
             break
@@ -254,7 +272,7 @@ def iterations(times):                          # returns nothing. prints accura
     x = []
 
     # run the whole program multiple times
-    for i in range(times):
+    for i in range(times):                                                              # by default times == 10
         T_new, T_new_key, D_new = new_points(D)
         T_guess = k_nearest_neighbour(T_new, D_new, k, printing)
         score, temp_dict = accuracy(T_new_key, T_guess)
@@ -269,7 +287,6 @@ def iterations(times):                          # returns nothing. prints accura
     plt.title("Pokémon classification accuracy over time")
     plt.xlabel("Iterations")
     plt.ylabel("Accuracy (%)")
-    # plt.xticks(np.arange(1, times + 1))
     plt.grid(True, color="gainsboro", linestyle="dashed", zorder=1)
     plt.show()
 
@@ -278,23 +295,22 @@ def iterations(times):                          # returns nothing. prints accura
     title = f"Accuracy table over {times} iterations"
     average_score = f"Average accuracy: {total_score / times:.2f} %"
     outer_border = "+---------------------------------------------------+"
-    inner_border = "|-------------------|----------------|--------------|"
     column_2 = "----------------"
     column_3 = "--------------"
 
-    # accuracy table                                                                    # kanske är snyggare utan variabler, i största möjliga mån
+    # accuracy table
     print(f"""
-    {outer_border}
+    +---------------------------------------------------+
     | {title:^{len(outer_border)-4}} |
-    {outer_border}
+    +---------------------------------------------------+
     |                   | Pikachu actual | Pichu actual |
-    {inner_border}
+    |-------------------|----------------|--------------|
     | Pikachu predicted | {score_dict["TP"]:>{len(column_2)-2}} | {score_dict["FP"]:>{len(column_3)-2}} |
-    {inner_border}
+    |-------------------|----------------|--------------|
     | Pichu predicted   | {score_dict["FN"]:>{len(column_2)-2}} | {score_dict["TN"]:>{len(column_3)-2}} |
-    {outer_border}
+    +---------------------------------------------------+
     | {average_score:^{len(outer_border)-4}} |
-    {outer_border}
+    +---------------------------------------------------+
     """)
 
 
@@ -318,41 +334,40 @@ def menu():                                     # runs the show
             user_choice = int(input())
 
             if user_choice == 1:
-                print("\n\n")
+                print("\n")
                 scatter_points(T, D)
                 nearest_neighbour(T, D)
 
             elif user_choice == 2:
-                print("\n\n")
+                print("\n")
                 T_user = user_testpoint()
                 nearest_neighbour(T_user, D)
                 scatter_points(T_user, D)
 
             elif user_choice == 3:
-                print("\n\n")
+                print("\n")
                 T_user = user_testpoint()
                 printing = True
                 k_nearest_neighbour(T_user, D, k, printing)
                 scatter_points(T_user, D)
 
             elif user_choice == 4:
-                print("\n\n")
+                print("\n")
                 T_new, T_new_key, D_new = new_points(D)
                 printing = True
                 guesses = k_nearest_neighbour(T_new, D_new, k, printing)
                 scatter_points(T_new, D_new)
 
             elif user_choice == 5:
-                print("\n\n")
+                print("\n")
                 iterations(times)
 
             elif user_choice == 6:
-                print("\n\n")
-                print(f"Have a good day.")
+                print("\nHave a good day.")
                 break
 
             else:
-                print("\n\nTry again.")
+                print("\nTry again.")
 
         except ValueError as err:
             print("\n")
@@ -368,11 +383,8 @@ times = 10
 printing = False
 
 
-# menu()
-
-class_guesses_arr = k_nearest_neighbour(T, D, k, printing)
+menu()
 
 
 # FIX
-# 1.1 kommentera min kod
-# 1.2 i KNN() 
+# 1.0 läs igenom alla uppgifter och dubbelkolla att allt är rätt
