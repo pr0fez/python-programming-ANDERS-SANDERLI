@@ -8,25 +8,11 @@ def read_files(T_path, D_path):                 # returns testpoints_arr, datapo
         lines = tp.readlines()
         testpoints = [pair.strip("()").split(", ") for row in lines[1:] for pair in row[3:].strip().split(") ")]
         testpoints_arr = np.array(testpoints, dtype=float)
-        # testpoints = []
-        # lines = tp.readlines()
-        # for row in lines[1:]:
-        #     row = row[3:].strip().split(") ")
-        #     for pair in row:
-        #         pair = pair.strip("()").split(", ")
-        #         testpoints.append(pair)
-        #         testpoints_arr = np.array(testpoints, dtype=float)
 
     with open(D_path, "r") as dp:
         lines = dp.readlines()
         datapoints = [row.strip().split(", ") for row in lines[1:]]
         datapoints_arr = np.array(datapoints, dtype=float)
-        # datapoints = []
-        # lines = dp.readlines()
-        # for row in lines[1:]:
-        #     row = row.strip().split(", ")
-        #     datapoints.append(row)
-        #     datapoints_arr = np.array(datapoints, dtype=float)
     
     return testpoints_arr, datapoints_arr
 
@@ -61,28 +47,19 @@ def Euclidean_distance_2D(P, Q):                # returns distance
 
 
 def distance_listing(T, D):                     # returns distance_list_2D
-    distance_list_2D = []
-    for p in T:
-        distance_list = []
-        for q in D:
-            distance = Euclidean_distance_2D(p, q[:2])
-            distance_list.append(distance)
-        distance_list_2D.append(distance_list)
+    distance_list_2D = [[Euclidean_distance_2D(p, q[:2]) for q in D] for p in T]
     return distance_list_2D
 
 
 def nearest_neighbour(T, D):                    # returns nothing. prints classification
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
     distance_list_2D = distance_listing(T, D)
-    for i in range(len(distance_list_2D)):
-        nearest_distance = 1000
-        nearest_class = None
-        nearest_coordinate = None
-        for index, distance in enumerate(distance_list_2D[i]):
-            if distance < nearest_distance:
-                nearest_distance = distance
-                nearest_class = D[index][2]
-                nearest_coordinate = D[index][:2]
+
+    for i, list in enumerate(distance_list_2D):
+        nearest_distance = min(list)
+        nearest_index = list.index(nearest_distance)
+        nearest_class = D[nearest_index][2]
+
         print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[nearest_class]}.")
 
 
@@ -91,7 +68,6 @@ def user_testpoint():                           # returns T_user
     T_user = []
 
     while True:
-
         try:
             width = float(input("Enter width: "))
             height = float(input("Enter height: "))
@@ -104,7 +80,6 @@ def user_testpoint():                           # returns T_user
 
         except ValueError:
             print("Width and height must be numbers.")
-
         else:
             break
     
@@ -117,44 +92,17 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
     temp_list_T = []
     temp_list_class = []
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
-
     distance_list_2D = distance_listing(T, D)
 
-    # creates a list of the k (default = 10) smallest distances for each testpoint
-    sorted_distances = []
-    for list in distance_list_2D:
-        temp = list.copy()
-        temp.sort()
-        sorted_distances.append(temp[:k])
-    
-    # searching for the distance in the original list and saving the index
-    sorted_indices = []
-    for i in range(len(sorted_distances)):
-        temp_list = []
-        for distance in sorted_distances[i]:
-            index = distance_list_2D[i].index(distance)
-            temp_list.append(index)
-        sorted_indices.append(temp_list)
-    
-    # uses the index to find the class label
-    sorted_class = []
-    for i in range(len(sorted_indices)):
-        temp_list = []
-        for index in sorted_indices[i]:
-            label = D[index][2]
-            temp_list.append(float(label))
-        sorted_class.append(temp_list)
+    # sorted lists of distances, their original indices and corresponding classes
+    sorted_distances = [sorted(lst)[:k] for lst in distance_list_2D]
+    sorted_indices = [[distance_list_2D[i].index(distance) for distance in sorted_distances[i]] for i in range(len(sorted_distances))]
+    sorted_class = [[float(D[index][2]) for index in sorted_indices[i]] for i in range(len(sorted_indices))]
     
     # counts the number of pichus and pikachus
     for i in range(len(sorted_class)):
-        num_pichu = 0
-        num_pikachu = 0
-        for j in sorted_class[i]:
-            j = int(j)
-            if j == 0:
-                num_pichu += 1
-            else:
-                num_pikachu += 1
+        num_pichu = sorted_class[i].count(0.0)
+        num_pikachu = sorted_class[i].count(1.0)
 
         # majority voting, print classification and make a list of same guesses
         if num_pichu > num_pikachu:
@@ -200,16 +148,10 @@ def new_points(D):                              # returns new_testpoints_arr, ne
     # variables
     new_datapoints_arr = D.copy()
     new_testpoints_list = []
-    pichu_points = []
-    pikachu_points = []
 
     # separating the two classes
-    for i in range(len(new_datapoints_arr)):
-        if new_datapoints_arr[i][2] == 0:
-            pichu_points.append(new_datapoints_arr[i])
-        else:
-            pikachu_points.append(new_datapoints_arr[i])
-    
+    pichu_points = [new_datapoints_arr[i] for i in range(len(new_datapoints_arr)) if new_datapoints_arr[i][2] == 0]
+    pikachu_points = [new_datapoints_arr[i] for i in range(len(new_datapoints_arr)) if new_datapoints_arr[i][2] == 1]
     pichu_points_arr = np.array(pichu_points)
     pikachu_points_arr = np.array(pikachu_points)
 
@@ -394,9 +336,3 @@ printing = False
 
 
 menu()
-
-
-
-
-# FIX
-# list comprehensions
