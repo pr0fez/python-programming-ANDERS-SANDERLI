@@ -5,22 +5,28 @@ import matplotlib.pyplot as plt
 def read_files(T_path, D_path):                 # returns testpoints_arr, datapoints_arr
     
     with open(T_path, "r") as tp:
-        temp_list = []
         lines = tp.readlines()
-        for row in lines[1:]:
-            row = row[3:].strip().split(") ")
-            for pair in row:
-                pair = pair.strip("()").split(", ")
-                temp_list.append(pair)
-                testpoints_arr = np.array(temp_list, dtype=float)
+        testpoints = [pair.strip("()").split(", ") for row in lines[1:] for pair in row[3:].strip().split(") ")]
+        testpoints_arr = np.array(testpoints, dtype=float)
+        # testpoints = []
+        # lines = tp.readlines()
+        # for row in lines[1:]:
+        #     row = row[3:].strip().split(") ")
+        #     for pair in row:
+        #         pair = pair.strip("()").split(", ")
+        #         testpoints.append(pair)
+        #         testpoints_arr = np.array(testpoints, dtype=float)
 
     with open(D_path, "r") as dp:
-        temp_list = []
         lines = dp.readlines()
-        for row in lines[1:]:
-            row = row.strip().split(", ")
-            temp_list.append(row)
-            datapoints_arr = np.array(temp_list, dtype=float)
+        datapoints = [row.strip().split(", ") for row in lines[1:]]
+        datapoints_arr = np.array(datapoints, dtype=float)
+        # datapoints = []
+        # lines = dp.readlines()
+        # for row in lines[1:]:
+        #     row = row.strip().split(", ")
+        #     datapoints.append(row)
+        #     datapoints_arr = np.array(datapoints, dtype=float)
     
     return testpoints_arr, datapoints_arr
 
@@ -89,17 +95,18 @@ def user_testpoint():                           # returns T_user
         try:
             width = float(input("Enter width: "))
             height = float(input("Enter height: "))
-            print()
 
-            if width < 0 or height < 0:
-                print("Width and height must be positive.")
+            if (width <= 0) or (height <= 0):
+                print("Width and height must be more than zero.")
                 continue
 
             T_user.append([width, height])
-            break
 
-        except ValueError as err:
-            print(f"An error occured: '{err}'")
+        except ValueError:
+            print("Width and height must be numbers.")
+
+        else:
+            break
     
     return T_user
 
@@ -113,28 +120,32 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
 
     distance_list_2D = distance_listing(T, D)
 
+    # creates a list of the k (default = 10) smallest distances for each testpoint
     sorted_distances = []
     for list in distance_list_2D:
         temp = list.copy()
         temp.sort()
-        sorted_distances.append(temp[:k])                   # creates a list of the kth (default = 10) smallest distances for each testpoint ...
+        sorted_distances.append(temp[:k])
     
+    # searching for the distance in the original list and saving the index
     sorted_indices = []
     for i in range(len(sorted_distances)):
         temp_list = []
         for distance in sorted_distances[i]:
-            index = distance_list_2D[i].index(distance)     # ... searching for the distance in the original list and saving the index ...
+            index = distance_list_2D[i].index(distance)
             temp_list.append(index)
         sorted_indices.append(temp_list)
     
+    # uses the index to find the class label
     sorted_class = []
     for i in range(len(sorted_indices)):
         temp_list = []
         for index in sorted_indices[i]:
-            label = D[index][2]                             # ... uses the index to find the class label
+            label = D[index][2]
             temp_list.append(float(label))
         sorted_class.append(temp_list)
     
+    # counts the number of pichus and pikachus
     for i in range(len(sorted_class)):
         num_pichu = 0
         num_pikachu = 0
@@ -271,8 +282,8 @@ def iterations(times):                          # returns nothing. prints accura
     score_dict = {"TP": 0, "TN": 0, "FP": 0, "FN": 0}
     x = []
 
-    # run the whole program multiple times
-    for i in range(times):                                                              # by default times == 10
+    # run the whole program multiple times (by default times == 10)
+    for i in range(times):
         T_new, T_new_key, D_new = new_points(D)
         T_guess = k_nearest_neighbour(T_new, D_new, k, printing)
         score, temp_dict = accuracy(T_new_key, T_guess)
@@ -367,16 +378,15 @@ def menu():                                     # runs the show
                 break
 
             else:
-                print("\nTry again.")
+                print("\nInvalid input. Please choose a number between 1 and 6.")
 
-        except ValueError as err:
-            print("\n")
-            print(f"An error occured: '{err}'")
+        except ValueError:
+            print("\nInvalid input. Please choose a number between 1 and 6.")
 
 
 # global variables
-path_datapoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/datapoints.txt"
 path_testpoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/testpoints.txt"
+path_datapoints = "/home/albot/coding/repos/python-programming-ANDERS-SANDERLI/Data/datapoints.txt"
 T, D = read_files(path_testpoints, path_datapoints)
 k = 10
 times = 10
@@ -386,5 +396,7 @@ printing = False
 menu()
 
 
+
+
 # FIX
-# 1.0 läs igenom alla uppgifter och dubbelkolla att allt är rätt
+# list comprehensions
