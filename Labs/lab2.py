@@ -157,7 +157,7 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
             temp_list_T.append(T[i])
             temp_list_class.append([1.0])
             
-        # if there is a tie, choose via weighted voting, print classification and make a list of same guesses
+        # when there is a tie, choose class via weighted voting, print classification and make a list of same guesses
         else:
             weight_pichu = 0
             weight_pikachu = 0
