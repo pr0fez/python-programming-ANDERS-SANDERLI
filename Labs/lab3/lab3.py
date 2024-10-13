@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 import os
 
 # global variables
-read_path = os.path.dirname(__file__) + "/unlabelled_data.csv"
-write_path = os.path.dirname(__file__) + "/labelled_data.csv"
+read_path = os.path.dirname(__file__) + "/unlabelled_data.csv"      # using OS library to dynamically read/write ...
+write_path = os.path.dirname(__file__) + "/labelled_data.csv"       # ... so that it works wherever the repo is located
 K = -1
 X = np.linspace(-10, 10)
 M = 0
@@ -46,7 +46,7 @@ def write_file(df, lbl):                        # returns df_l, a dataframe with
 
 def create_figure(df):                          # returns ax, a plot object
 
-    fig, ax = plt.subplots()                                                # figsize=(9, 9) såg nice ut
+    fig, ax = plt.subplots()
 
     # ax.axis("equal")
     ax.axhline(y = 0, color = "lightseagreen", linewidth = 0.5, zorder = 2)
@@ -54,9 +54,9 @@ def create_figure(df):                          # returns ax, a plot object
 
     max_limit = max(abs(df.values.min()), abs(df.values.max()))             # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
     ax.set_xlim(-max_limit - 0.5, max_limit + 0.5)                          # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
-    ax.set_ylim(-max_limit -0.5 , max_limit + 0.5)                          # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
+    ax.set_ylim(-max_limit - 0.5, max_limit + 0.5)                          # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
     
-    ax.set_title("A scatter plot of the dataframe")
+    ax.set_title("A scatter plot of the dataframe\n", fontsize = 16)
     ax.set_xlabel("x-axis")
     ax.set_ylabel("y-axis")
     ax.grid(True, color="gainsboro", linestyle="dashed", zorder=1)
@@ -68,8 +68,8 @@ def plot_line(ax, X, K, M):                     # plots a decision boundary
 
     Y = K * X + M
     ax.plot(X, Y, color = "paleturquoise", label = (f"y = {K}x + {M}"), linewidth = 3, zorder = 2)
-    ax.fill_between(X, Y, ax.get_ylim()[1], color='aquamarine', alpha=0.25, zorder=0)
-    ax.fill_between(X, Y, ax.get_ylim()[0], color='turquoise', alpha=0.15, zorder=0)
+    ax.fill_between(X, Y, ax.get_ylim()[1], color='aquamarine', alpha=0.3, zorder=0)
+    ax.fill_between(X, Y, ax.get_ylim()[0], color='turquoise', alpha=0.2, zorder=0)
     ax.legend(loc = "upper left")
 
 
