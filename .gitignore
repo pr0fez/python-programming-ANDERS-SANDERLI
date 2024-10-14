@@ -162,4 +162,4 @@ cython_debug/
 #.idea/
 
 # Custom ignores
-.git.bfg-report
+.git.bfg-report/

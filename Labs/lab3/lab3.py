@@ -48,13 +48,14 @@ def create_figure(df):                          # returns ax, a plot object
 
     fig, ax = plt.subplots()
 
-    # ax.axis("equal")
     ax.axhline(y = 0, color = "lightseagreen", linewidth = 0.5, zorder = 2)
     ax.axvline(x = 0, color = "lightseagreen", linewidth = 0.5, zorder = 2)
 
-    max_limit = max(abs(df.values.min()), abs(df.values.max()))             # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
-    ax.set_xlim(-max_limit - 0.5, max_limit + 0.5)                          # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
-    ax.set_ylim(-max_limit - 0.5, max_limit + 0.5)                          # dessa rader fick jag från Claude, behöver dubbelkollas. gör att plot center är origo
+    # the code snippet below is from Claude (Sonnet 3.5) using the prompt: "How can I center a graph on origo using python and matplotlib?"
+    max_limit = max(abs(df.values.min()), abs(df.values.max()))
+    ax.set_xlim(-max_limit - 0.5, max_limit + 0.5)
+    ax.set_ylim(-max_limit - 0.5, max_limit + 0.5)
+    # the code snippet above is from Claude (Sonnet 3.5) using the prompt: "How can I center a graph on origo using python and matplotlib?"
     
     ax.set_title("A scatter plot of the dataframe\n", fontsize = 16)
     ax.set_xlabel("x-axis")
@@ -64,7 +65,7 @@ def create_figure(df):                          # returns ax, a plot object
     return ax
 
 
-def plot_line(ax, X, K, M):                     # plots a decision boundary
+def plot_line(ax, X, K, M):                     # plots a linear decision boundary
 
     Y = K * X + M
     ax.plot(X, Y, color = "paleturquoise", label = (f"y = {K}x + {M}"), linewidth = 3, zorder = 2)
@@ -91,7 +92,7 @@ def plot_scatter(ax, df_l):                     # plots a scatter plot with labe
 if __name__ == "__main__":
     
     import matplotlib
-    matplotlib.use('qt5agg')
+    matplotlib.use('qt5agg')                    # using the Qt5Agg backend to display the plot in a separate window
 
     dataframe = read_file(read_path)
     labels = classifier(dataframe, K, M)
