@@ -163,3 +163,4 @@ cython_debug/
 
 # Custom ignores
 .git.bfg-report/
+*note-to-self.txt
