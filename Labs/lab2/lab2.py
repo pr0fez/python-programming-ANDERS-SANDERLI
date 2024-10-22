@@ -45,11 +45,13 @@ def Euclidean_distance_2D(P, Q):                # returns distance
     distance = np.sqrt((np.square(P[0] - Q[0])) + (np.square(P[1] - Q[1])))
     return float(distance)
 
-
+# would be a lost simpler to store the class together with the distance
 def distance_listing(T, D):                     # returns distance_list_2D
     distance_list_2D = [[Euclidean_distance_2D(p, q[:2]) for q in D] for p in T]
     return distance_list_2D
 
+# raphael says: This function is superfluous. It doesn't do anything that couldn't be done by composing other functions 
+# in this file, eg. print(k_nearest_neighbours(... k=1))
 
 def nearest_neighbour(T, D):                    # returns nothing. prints classification
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
@@ -85,15 +87,16 @@ def user_testpoint():                           # returns T_user
     
     return T_user
 
-
+# This function is overly complex. 
 def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, prints classification if printing == True
-    
+    # Do you really need all these variables?
     # variables
     temp_list_T = []
     temp_list_class = []
     pokémon_dict = {0: "Pichu", 1: "Pikachu"}
     distance_list_2D = distance_listing(T, D)
-
+    
+    # This is a very complicated way to produce the result....
     # sorted lists of distances, their original indices and corresponding classes
     sorted_distances = [sorted(lst)[:k] for lst in distance_list_2D]
     sorted_indices = [[distance_list_2D[i].index(distance) for distance in sorted_distances[i]] for i in range(len(sorted_distances))]
@@ -115,7 +118,9 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
                 print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
             temp_list_T.append(T[i])
             temp_list_class.append([1.0])
-            
+        # Again, this is _waaay_ to complex for something very simple. Do these cases ever happen? Can there be a tie
+        # and yet a difference in weights? If so, how relevant is that difference? Keep it simple.
+        
         # when there is a tie, choose class via weighted voting, print classification and make a list of same guesses
         else:
             weight_pichu = 0
@@ -136,7 +141,8 @@ def k_nearest_neighbour(T, D, k, printing):     # returns class_guesses_arr, pri
                     print(f"Sample with (width, height): {T[i]} classified as {pokémon_dict[1]}.")
                 temp_list_T.append(T[i])
                 temp_list_class.append([1.0])
-    
+    # This is waaay to complex. Take a step back and think about the problem. What are you looking for, and how do you get there?
+    # You're just looking for a sorted list of distances and classes, then take the n first elements. No need for all this detailed handling.
     class_guesses_arr = np.hstack((temp_list_T, temp_list_class))
 
     
@@ -149,7 +155,13 @@ def new_points(D):                              # returns new_testpoints_arr, ne
     new_datapoints_arr = D.copy()
     new_testpoints_list = []
 
+    # Why are you separaing the classes? That only complicates handling. They can comfortably be in the same structure.
+    # Just include the class as well, eg [(width, height, class)]. 
+    
     # separating the two classes
+    # see documentation for enumerate(). That is preferrable to range(len(..))
+    # however, since all you do with it is new_data[i], it should just be "for a in new_datapoints if a[2] == 0"
+    # not sure why you so desperately want to use indices ;)
     pichu_points = [new_datapoints_arr[i] for i in range(len(new_datapoints_arr)) if new_datapoints_arr[i][2] == 0]
     pikachu_points = [new_datapoints_arr[i] for i in range(len(new_datapoints_arr)) if new_datapoints_arr[i][2] == 1]
     pichu_points_arr = np.array(pichu_points)
@@ -158,6 +170,7 @@ def new_points(D):                              # returns new_testpoints_arr, ne
     # choosing new testpoints
     for i in range(len(pichu_points_arr)):
         if len(new_testpoints_list) < 50:
+            # no need for these declarations, since the first operation on them is an assignment below
             temp_pichu = []
             temp_pikachu = []
             np.random.shuffle(pichu_points_arr)
@@ -170,7 +183,7 @@ def new_points(D):                              # returns new_testpoints_arr, ne
             pikachu_points_arr = pikachu_points_arr[1:]
         else:
             break
-    
+    # again, alot of code for very little work.
     new_testpoints_key_arr = np.array(new_testpoints_list)
     np.random.shuffle(new_testpoints_key_arr)
     np.random.shuffle(pichu_points_arr)
@@ -179,7 +192,9 @@ def new_points(D):                              # returns new_testpoints_arr, ne
     # combining the two classes
     new_datapoints_arr = np.vstack((pichu_points_arr, pikachu_points_arr))
     np.random.shuffle(new_datapoints_arr)
-
+    
+    # all that work, only to throw it away at the end.....
+    
     # removing the class labels from the testpoints
     new_testpoints_list = []
     for i in range(len(new_testpoints_key_arr)):
